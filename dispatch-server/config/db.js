@@ -19,6 +19,7 @@ async function connectDB() {
     .createIndexes([
       { key: { trackingId: 1 }, unique: true },
       { key: { bookedBy: 1 } },
+      { key: { createdAt: -1 } },
     ]);
   await db.collection("riders").createIndex({ email: 1 }, { unique: true });
 

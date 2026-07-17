@@ -5,15 +5,10 @@ const calculateCost = require("../utils/calculateCost");
 const generateTrackingId = require("../utils/generateTrackingId");
 
 const bookParcel = asyncHandler(async (req, res) => {
-  const { parcelType, title, weight, pickup, delivery} = req.body;
-  const bookedBy = req.decoded.email
+  const { parcelType, title, weight, pickup, delivery } = req.body;
+  const bookedBy = req.decoded.email;
 
-  if (
-    !title ||
-    !weight ||
-    !pickup?.district ||
-    !delivery?.district
-  ) {
+  if (!title || !weight || !pickup?.district || !delivery?.district) {
     return res
       .status(400)
       .json({ success: false, message: "Missing required parcel fields" });
@@ -34,7 +29,7 @@ const bookParcel = asyncHandler(async (req, res) => {
     bookedBy,
     pickup,
     delivery,
-    cost, 
+    cost,
     deliveryStatus: "pending",
     paymentStatus: "unpaid",
     assignedRider: null,
@@ -50,20 +45,67 @@ const bookParcel = asyncHandler(async (req, res) => {
   });
 });
 
-const getParcels = asyncHandler(async (req, res) => {
-  const { email, status } = req.query;
-  const query = {};
+// escape user input before building a regex (prevents ReDoS + broken queries)
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+// fields a client is allowed to sort by — never trust raw input here
+const SORTABLE = ["createdAt", "cost", "weight"];
+
+const getParcels = asyncHandler(async (req, res) => {
+  const {
+    email,
+    status,
+    search,
+    sortBy = "createdAt",
+    order = "desc",
+    page = 1,
+    limit = 10,
+  } = req.query;
+
+  const query = {};
   if (email) query.bookedBy = email;
   if (status) query.deliveryStatus = status;
 
-  const parcels = await getDB()
-    .collection("parcels")
-    .find(query)
-    .sort({ createdAt: -1 })
-    .toArray();
+  if (search) {
+    const rx = new RegExp(escapeRegex(search), "i");
+    query.$or = [
+      { title: rx },
+      { trackingId: rx },
+      { "pickup.district": rx },
+      { "delivery.district": rx },
+    ];
+  }
+  const sortField = SORTABLE.includes(sortBy) ? sortBy : "createdAt";
+  const sortOrder = order === "asc" ? 1 : -1;
 
-  res.json({ success: true, count: parcels.length, data: parcels });
+  // ---- paginate ----
+  const pageNum = Math.max(1, parseInt(page) || 1);
+  const perPage = Math.min(50, Math.max(1, parseInt(limit) || 10)); // hard cap at 50
+  const skip = (pageNum - 1) * perPage;
+
+  const parcels = getDB().collection("parcels");
+
+  const [data, total] = await Promise.all([
+    parcels
+      .find(query)
+      .sort({ [sortField]: sortOrder })
+      .skip(skip)
+      .limit(perPage)
+      .toArray(),
+    parcels.countDocuments(query),
+  ]);
+  res.json({
+    success: true,
+    data,
+    pagination: {
+      total,
+      page: pageNum,
+      limit: perPage,
+      pages: Math.ceil(total / perPage),
+      hasNext: pageNum * perPage < total,
+      hasPrev: pageNum > 1,
+    },
+  });
 });
 
 const getParcelById = asyncHandler(async (req, res) => {
@@ -163,12 +205,10 @@ const cancelParcel = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Parcel not found" });
 
   if (parcel.deliveryStatus === "delivered")
-    return res
-      .status(409)
-      .json({
-        success: false,
-        message: "A delivered parcel can't be cancelled",
-      });
+    return res.status(409).json({
+      success: false,
+      message: "A delivered parcel can't be cancelled",
+    });
 
   const now = new Date();
   await parcels.updateOne(

@@ -7,6 +7,7 @@ const config = require('./config/env')
 const userRoutes = require("./routes/userRoutes")
 const parcelRoutes = require("./routes/parcelRoutes")
 const riderRoutes = require("./routes/riderRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express()
 
@@ -21,6 +22,7 @@ app.get('/', (req,res)=>{
 app.use('/api/users', userRoutes);
 app.use('/api/parcels', parcelRoutes);
 app.use("/api/riders", riderRoutes);
+app.use("/api/payments", paymentRoutes);
 
 
 // order matters: 404 after all routes, error handler LAST

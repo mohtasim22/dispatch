@@ -22,6 +22,7 @@ async function connectDB() {
       { key: { createdAt: -1 } },
     ]);
   await db.collection("riders").createIndex({ email: 1 }, { unique: true });
+  await db.collection("payments").createIndex({ transactionId: 1 }, { unique: true });
 
   console.log("MongoDB connected");
   return db;

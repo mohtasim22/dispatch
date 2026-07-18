@@ -1,18 +1,45 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import useAuth from "../hooks/useAuth";
+import Swal from "sweetalert2";
+import useAxios from "../hooks/useAxios";
 
-// Register page — DESIGN ONLY. No auth logic yet.
-// TODO (Step 3B): add handleRegister → createUser + updateUserProfile + navigate.
 const Register = () => {
+  const { createUser, updateUserProfile } = useAuth();
+  const navigate = useNavigate();   
+  const axiosPublic = useAxios();  
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.name.value;
+    const photo = form.photo.value;
+    const email = form.email.value;
+    const password = form.password.value;
+    try {
+      await createUser(email, password);
+      await updateUserProfile({ displayName: name, photoURL: photo });
+      await axiosPublic.post("/users", { name, email, photoURL: photo });
+      Swal.fire({ icon: "success", title: "Account created!", timer: 1500, showConfirmButton: false });
+      navigate("/");
+    } catch (error) {
+      Swal.fire({ icon: "error", title: "Registration failed", text: error.message });
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 flex justify-center">
       <div className="w-full max-w-sm bg-gray-900 border border-gray-800 rounded-2xl shadow-sm p-8">
-        <h2 className="text-2xl font-extrabold text-white">Create your account</h2>
-        <p className="mt-1 text-sm text-gray-400">Start sending parcels in minutes.</p>
+        <h2 className="text-2xl font-extrabold text-white">
+          Create your account
+        </h2>
+        <p className="mt-1 text-sm text-gray-400">
+          Start sending parcels in minutes.
+        </p>
 
-        {/* TODO: onSubmit={handleRegister} */}
-        <form className="mt-6 flex flex-col gap-4">
+        <form onSubmit={handleRegister} className="mt-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-gray-300">Full name</label>
+            <label className="text-sm font-semibold text-gray-300">
+              Full name
+            </label>
             <input
               type="text"
               name="name"
@@ -23,7 +50,8 @@ const Register = () => {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-gray-300">
-              Photo URL <span className="text-gray-500 font-normal">(optional)</span>
+              Photo URL{" "}
+              <span className="text-gray-500 font-normal">(optional)</span>
             </label>
             <input
               type="text"
@@ -44,7 +72,9 @@ const Register = () => {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-gray-300">Password</label>
+            <label className="text-sm font-semibold text-gray-300">
+              Password
+            </label>
             <input
               type="password"
               name="password"
@@ -88,10 +118,22 @@ const Register = () => {
 
 const GoogleMark = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24">
-    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
-    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z" />
-    <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z" />
-    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z" />
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"
+    />
   </svg>
 );
 

@@ -1,16 +1,32 @@
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+import useAuth from "../hooks/useAuth";
+import Swal from "sweetalert2";
 
-// Login page — DESIGN ONLY. No auth logic yet.
-// TODO (Step 3B): add handleLogin → signIn(email, password) + navigate.
 const Login = () => {
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || "/";
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    try {
+      await signIn(form.email.value, form.password.value);
+      Swal.fire({ icon: "success", title: "Logged in!", timer: 1500, showConfirmButton: false });
+      navigate(from, { replace: true });
+    } catch (error) {
+      Swal.fire({ icon: "error", title: "Login failed", text: error.message });
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 flex justify-center">
       <div className="w-full max-w-sm bg-gray-900 border border-gray-800 rounded-2xl shadow-sm p-8">
         <h2 className="text-2xl font-extrabold text-white">Welcome back</h2>
         <p className="mt-1 text-sm text-gray-400">Log in to manage your parcels.</p>
 
-        {/* TODO: onSubmit={handleLogin} */}
-        <form className="mt-6 flex flex-col gap-4">
+        <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-gray-300">Email</label>
             <input

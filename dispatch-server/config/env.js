@@ -6,7 +6,9 @@ function required(key) {
 
 const config = {
     port : process.env.PORT || 5000,
-    clientUrl : process.env.CLIENT_URL || "http://localhost:5173",
+    clientUrls: (process.env.CLIENT_URL || "http://localhost:5173")
+    .split(",")
+    .map((s) => s.trim()),
     mongoUri: required('MONGO_URI'),
     stripeSecret: required("STRIPE_SECRET_KEY")
 }

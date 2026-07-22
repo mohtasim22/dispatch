@@ -65,7 +65,7 @@ const getParcels = asyncHandler(async (req, res) => {
   const query = {};
   if (email) query.bookedBy = email;
   if (status) query.deliveryStatus = status;
-
+  if (req.query.rider) query.assignedRider = req.query.rider;
   if (search) {
     const rx = new RegExp(escapeRegex(search), "i");
     query.$or = [

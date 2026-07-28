@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import useAxios from "../hooks/useAxios";
 
 const Register = () => {
-  const { createUser, updateUserProfile } = useAuth();
+  const { createUser, updateUserProfile, googleSignIn } = useAuth();
   const navigate = useNavigate();   
   const axiosPublic = useAxios();  
   const handleRegister = async (e) => {
@@ -24,6 +24,19 @@ const Register = () => {
       Swal.fire({ icon: "error", title: "Registration failed", text: error.message });
     }
   };
+
+  const handleGoogle = async () => {
+  try {
+    const result = await googleSignIn();
+    const u = result.user;
+    // save to YOUR db — idempotent, so safe on every Google login
+    await axiosPublic.post("/users", { name: u.displayName, email: u.email, photoURL: u.photoURL });
+    Swal.fire({ icon: "success", title: "Logged in!", timer: 1200, showConfirmButton: false });
+    navigate("/", { replace: true });
+  } catch (error) {
+    Swal.fire({ icon: "error", title: "Google sign-in failed", text: error.message });
+  }
+};
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 flex justify-center">
@@ -99,6 +112,7 @@ const Register = () => {
 
         <button
           type="button"
+          onClick={handleGoogle}
           className="w-full h-11 flex items-center justify-center gap-2.5 rounded-lg border border-gray-700 text-sm font-semibold text-gray-200 hover:bg-gray-800 transition-colors"
         >
           <GoogleMark />

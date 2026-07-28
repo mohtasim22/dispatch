@@ -1,9 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router";
 import useAuth from "../hooks/useAuth";
 import Swal from "sweetalert2";
+import useAxios from "../hooks/useAxios";
 
 const Login = () => {
-  const { signIn } = useAuth();
+  const { signIn, googleSignIn} = useAuth();
+  const axiosPublic = useAxios();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || "/";
@@ -19,6 +21,19 @@ const Login = () => {
       Swal.fire({ icon: "error", title: "Login failed", text: error.message });
     }
   };
+
+  const handleGoogle = async () => {
+  try {
+    const result = await googleSignIn();
+    const u = result.user;
+    // save to YOUR db — idempotent, so safe on every Google login
+    await axiosPublic.post("/users", { name: u.displayName, email: u.email, photoURL: u.photoURL });
+    Swal.fire({ icon: "success", title: "Logged in!", timer: 1200, showConfirmButton: false });
+    navigate(from, { replace: true });
+  } catch (error) {
+    Swal.fire({ icon: "error", title: "Google sign-in failed", text: error.message });
+  }
+};
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 flex justify-center">
@@ -70,6 +85,7 @@ const Login = () => {
         {/* social (design only) */}
         <button
           type="button"
+          onClick={handleGoogle}
           className="w-full h-11 flex items-center justify-center gap-2.5 rounded-lg border border-gray-700 text-sm font-semibold text-gray-200 hover:bg-gray-800 transition-colors"
         >
           <GoogleMark />

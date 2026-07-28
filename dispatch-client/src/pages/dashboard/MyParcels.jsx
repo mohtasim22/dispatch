@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import useAuth from "../../hooks/useAuth";
 import useDebounce from "../../hooks/useDebounce";
+import Swal from "sweetalert2";
 
 const STATUS_STYLES = {
   pending: "bg-gray-500/15 text-gray-300",
@@ -16,8 +17,8 @@ const MyParcels = () => {
   const { user } = useAuth();
 
   const [status, setStatus] = useState("");
-  const [search, setSearch] = useState("");            // instant — drives the input
-  const debouncedSearch = useDebounce(search, 400);    // settles — drives the query
+  const [search, setSearch] = useState(""); // instant — drives the input
+  const debouncedSearch = useDebounce(search, 400); // settles — drives the query
   const [page, setPage] = useState(1);
   const limit = 5;
 
@@ -31,6 +32,19 @@ const MyParcels = () => {
       const res = await axiosSecure.get(`/parcels?${params}`);
       return res.data; // { success, data, pagination }
     },
+  });
+
+  const pay = useMutation({
+    mutationFn: (parcelId) => axiosSecure.post("/payments/init", { parcelId }),
+    onSuccess: (res) => {
+      window.location.href = res.data.url; // redirect the whole browser to SSLCommerz
+    },
+    onError: (err) =>
+      Swal.fire({
+        icon: "error",
+        title: "Payment failed",
+        text: err.response?.data?.message || err.message,
+      }),
   });
 
   const parcels = data?.data ?? [];
@@ -87,6 +101,7 @@ const MyParcels = () => {
                     <th className="text-left px-4 py-3">Route</th>
                     <th className="text-left px-4 py-3">Cost</th>
                     <th className="text-left px-4 py-3">Status</th>
+                    <th className="text-left px-4 py-3">Payment</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -111,6 +126,23 @@ const MyParcels = () => {
                         >
                           {p.deliveryStatus}
                         </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {p.paymentStatus === "paid" ? (
+                          <span className="text-emerald-400 text-xs font-semibold">
+                            ✓ Paid
+                          </span>
+                        ) : p.deliveryStatus === "cancelled" ? (
+                          <span className="text-gray-600 text-xs">—</span>
+                        ) : (
+                          <button
+                            onClick={() => pay.mutate(p._id)}
+                            disabled={pay.isPending}
+                            className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold disabled:opacity-50"
+                          >
+                            Pay ৳{p.cost}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

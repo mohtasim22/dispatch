@@ -1,6 +1,13 @@
 const { initializeApp, cert, getApps } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
-const serviceAccount = require("../firebase-admin-key.json");
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT_B64) {
+  serviceAccount = JSON.parse(
+    Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, "base64").toString("utf8")
+  );
+} else {
+  serviceAccount = require("../firebase-admin-key.json");
+}
 
 // guard against double-init on nodemon restarts
 if (!getApps().length) {

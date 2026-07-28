@@ -15,6 +15,12 @@ import BecomeRider from "../pages/dashboard/BecomeRider";
 import ApproveRiders from "../pages/dashboard/ApproveRiders";
 import AllParcels from "../pages/dashboard/AllParcels";
 import AssignedDeliveries from "../pages/dashboard/AssignedDeliveries";
+import PaymentResult from "../pages/PaymentResult";
+import Profile from "../pages/dashboard/profile";
+import Payments from "../pages/dashboard/payments";
+import Track from "../pages/Track";
+import HowItWorks from "../pages/HowItWorks";
+import Coverage from "../pages/Coverage";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +30,12 @@ export const router = createBrowserRouter([
       { index: true, element: <Home></Home> },
       { path: "login", element: <Login></Login> },
       { path: "register", element: <Register></Register> },
+      { path: "payment/success", element: <PaymentResult type="success" /> },
+      { path: "payment/fail", element: <PaymentResult type="fail" /> },
+      { path: "payment/cancel", element: <PaymentResult type="cancel" /> },
+      { path: "track", element: <Track /> },
+      { path: "how", element: <HowItWorks /> },
+      { path: "coverage", element: <Coverage /> },
     ],
   },
   {
@@ -37,6 +49,8 @@ export const router = createBrowserRouter([
       { index: true, element: <DashboardHome></DashboardHome> },
       { path: "book", element: <BookParcel /> },
       { path: "parcels", element: <MyParcels /> },
+      { path: "profile", element: <Profile /> },
+      { path: "payments", element: <Payments /> },
       {
         path: "users",
         element: (

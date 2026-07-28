@@ -6,6 +6,7 @@ const {
   updateParcelStatus,
   assignRider,
   cancelParcel,
+  trackParcel
 } = require("../controllers/parcelController");
 const verifyToken = require("../middleware/verifyToken");
 const verifyAdmin = require("../middleware/verifyAdmin");
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.post("/", verifyToken, bookParcel);
 router.get("/", verifyToken, getParcels);
+router.get("/track/:trackingId", trackParcel);  
 router.get("/:id", verifyToken, getParcelById);
 router.patch("/:id/status", verifyToken, verifyRider, updateParcelStatus);
 router.patch("/:id/assign", verifyToken, verifyAdmin, assignRider);

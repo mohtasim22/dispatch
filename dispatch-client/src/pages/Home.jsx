@@ -1,7 +1,9 @@
 import { Link } from "react-router";
+import useAuth from "../hooks/useAuth";
 
 // Landing page — design only. Sections: hero, how-it-works, features, CTA.
 const Home = () => {
+  const { user } = useAuth();
   const steps = [
     { n: "1", title: "Book a parcel", text: "Enter pickup, drop-off and weight. Get an instant price." },
     { n: "2", title: "We pick it up", text: "A nearby rider collects your parcel from your door." },
@@ -35,13 +37,13 @@ const Home = () => {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                to="/register"
+                to={user ? "/dashboard/book" : "/register"}
                 className="px-6 py-3 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold transition-colors"
               >
                 Book a parcel
               </Link>
               <Link
-                to="/coverage"
+                to="/track"
                 className="px-6 py-3 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 font-semibold transition-colors"
               >
                 Track a parcel
@@ -117,10 +119,7 @@ const Home = () => {
           <p className="mt-3 text-teal-50 max-w-md mx-auto">
             Create an account and book a delivery in under two minutes.
           </p>
-          <Link
-            to="/register"
-            className="mt-7 inline-flex px-6 py-3 rounded-lg bg-white text-teal-700 font-semibold hover:bg-teal-50 transition-colors"
-          >
+          <Link to={user ? "/dashboard" : "/register"} className="inline-block px-6 py-3 rounded-lg bg-white text-teal-600 font-semibold hover:bg-gray-200">
             Get started
           </Link>
         </div>

@@ -5,12 +5,16 @@ function required(key) {
 }
 
 const config = {
-    port : process.env.PORT || 5000,
-    clientUrls: (process.env.CLIENT_URL || "http://localhost:5173")
+  port: process.env.PORT || 5000,
+  clientUrls: (process.env.CLIENT_URL || "http://localhost:5173")
     .split(",")
     .map((s) => s.trim()),
-    mongoUri: required('MONGO_URI'),
-    stripeSecret: required("STRIPE_SECRET_KEY")
-}
+  mongoUri: required("MONGO_URI"),
+  stripeSecret: required("STRIPE_SECRET_KEY"),
+  sslczStoreId: required("SSLCZ_STORE_ID"),
+  sslczStorePass: required("SSLCZ_STORE_PASSWD"),
+  sslczIsLive: process.env.SSLCZ_IS_LIVE === "true",
+  serverUrl: process.env.SERVER_URL || "http://localhost:5000",
+};
 
-module.exports = config
+module.exports = config;

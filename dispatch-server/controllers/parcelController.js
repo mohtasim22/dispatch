@@ -227,6 +227,17 @@ const cancelParcel = asyncHandler(async (req, res) => {
 
   res.json({ success: true, message: "Parcel cancelled" });
 });
+
+const trackParcel = asyncHandler(async (req, res) => {
+  const parcel = await getDB().collection("parcels").findOne(
+    { trackingId: req.params.trackingId.toUpperCase() },
+    { projection: { trackingId: 1, title: 1, deliveryStatus: 1, "pickup.district": 1, "delivery.district": 1, trackingHistory: 1 } }
+  );
+  if (!parcel) return res.status(404).json({ success: false, message: "No parcel with that tracking ID" });
+  res.json({ success: true, data: parcel });
+});
+// add to exports
+
 module.exports = {
   bookParcel,
   getParcels,
@@ -234,4 +245,5 @@ module.exports = {
   updateParcelStatus,
   assignRider,
   cancelParcel,
+  trackParcel
 };

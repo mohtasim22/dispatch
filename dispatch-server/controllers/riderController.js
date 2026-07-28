@@ -13,9 +13,10 @@ const applyForRider = asyncHandler(async (req, res) => {
     nid,
     bikeBrand,
     bikeRegNumber,
+    licenseUrl
   } = req.body;
 
-  if (!name || !email || !phone || !region) {
+  if (!name || !email || !phone || !region || !licenseUrl) {
     return res
       .status(400)
       .json({ success: false, message: "Missing required fields" });
@@ -42,6 +43,7 @@ const applyForRider = asyncHandler(async (req, res) => {
     bikeRegNumber: bikeRegNumber || null,
     status: "pending",
     appliedAt: new Date(),
+    licenseUrl: licenseUrl || null
   });
 
   res.status(201).json({ success: true, id: result.insertedId });
